@@ -23,17 +23,16 @@ export function TopicButton({ icon, title, description, color, onClick, classNam
       className={cn(
         'group relative w-48 h-48 rounded-full border-4 transition-all duration-300',
         'hover:scale-105 hover:shadow-xl active:scale-95',
-        'animate-float',
         colorClasses[color],
         className
       )}
     >
-      <div className="flex flex-col items-center justify-center h-full p-6">
-        <div className="text-6xl mb-3">
+      <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+        <div className="text-8xl mb-2">
           {icon}
         </div>
-        <h3 className="text-lg font-bold mb-2">{title}</h3>
-        <p className="text-sm text-center opacity-80 leading-tight">{description}</p>
+        <h3 className="text-lg font-bold mb-1 leading-tight">{title}</h3>
+        <p className="text-xs opacity-80 leading-tight">{description}</p>
       </div>
       <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </button>
