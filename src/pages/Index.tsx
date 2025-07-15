@@ -1,20 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { TopicButton } from '@/components/TopicButton';
 import { QuizQuestion } from '@/components/QuizQuestion';
 import { QuizResults } from '@/components/QuizResults';
 import { ChatTab } from '@/components/ChatTab';
+import UserProfile from '@/components/UserProfile';
 import { quizTopics, QuizTopic } from '@/data/quizData';
-import { Target } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, LogIn } from 'lucide-react';
 import quizBuddyLogo from '@/assets/quiz-buddy-logo.png';
 
 type AppState = 'home' | 'quiz' | 'results';
 
 const Index = () => {
+  const { user, profile, loading } = useAuth();
+  const navigate = useNavigate();
   const [appState, setAppState] = useState<AppState>('home');
   const [selectedTopic, setSelectedTopic] = useState<QuizTopic | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
 
   const handleTopicSelect = (topic: QuizTopic) => {
     setSelectedTopic(topic);
@@ -52,9 +65,39 @@ const Index = () => {
     setScore(0);
   };
 
+  // Show loading spinner while auth is loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-primary mb-4">Quiz Buddy</h1>
+          <p className="text-lg text-muted-foreground mb-6">Please sign in to start your learning adventure!</p>
+          <Button onClick={() => navigate('/auth')} size="lg">
+            <LogIn className="mr-2 h-4 w-4" />
+            Sign In
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (appState === 'home') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 relative overflow-hidden">
+        {/* User Profile in top right */}
+        <div className="absolute top-4 right-4 z-20">
+          <UserProfile />
+        </div>
+
         {/* Fun background elements */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-10 left-10 text-4xl" style={{animationDelay: '0s'}}>⭐</div>
@@ -81,7 +124,7 @@ const Index = () => {
               </div>
               <div className="inline-block bg-purple-600 p-4 rounded-full shadow-lg">
                 <p className="text-xl font-semibold text-white">
-                  🎓 Choose a topic to start your learning adventure! 🌈
+                  🎓 Welcome back, {profile?.display_name}! Choose a topic to start your learning adventure! 🌈
                 </p>
               </div>
             </div>
@@ -119,6 +162,11 @@ const Index = () => {
   if (appState === 'quiz' && selectedTopic) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/20 to-primary/10">
+        {/* User Profile in top right */}
+        <div className="absolute top-4 right-4 z-20">
+          <UserProfile />
+        </div>
+
         <div className="container mx-auto px-4 py-8">
           <QuizQuestion
             question={selectedTopic.questions[currentQuestionIndex]}
@@ -141,6 +189,11 @@ const Index = () => {
   if (appState === 'results' && selectedTopic) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/20 to-primary/10">
+        {/* User Profile in top right */}
+        <div className="absolute top-4 right-4 z-20">
+          <UserProfile />
+        </div>
+
         <div className="container mx-auto px-4 py-8">
           <QuizResults
             score={score}
