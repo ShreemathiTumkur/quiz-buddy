@@ -5,6 +5,7 @@ import { QuizResults } from '@/components/QuizResults';
 import { ChatTab } from '@/components/ChatTab';
 import { quizTopics, QuizTopic } from '@/data/quizData';
 import { Target } from 'lucide-react';
+import quizBuddyLogo from '@/assets/quiz-buddy-logo.png';
 
 type AppState = 'home' | 'quiz' | 'results';
 
@@ -69,8 +70,12 @@ const Index = () => {
           <div className="text-center mb-12">
             <div className="mb-8">
               <div className="flex items-center justify-center gap-4 mb-4">
-                <div className="text-6xl">🤖</div>
-                <h1 className="text-7xl font-bold bg-gradient-rainbow bg-clip-text text-transparent">
+                <img 
+                  src={quizBuddyLogo} 
+                  alt="Quiz Buddy Logo" 
+                  className="w-20 h-20 object-contain"
+                />
+                <h1 className="text-7xl font-bold text-foreground">
                   Quiz Buddy
                 </h1>
               </div>
