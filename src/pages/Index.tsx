@@ -56,22 +56,25 @@ const Index = () => {
       <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 relative overflow-hidden">
         {/* Fun background elements */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-10 left-10 text-4xl animate-bounce" style={{animationDelay: '0s'}}>⭐</div>
-          <div className="absolute top-20 right-20 text-3xl animate-bounce" style={{animationDelay: '1s'}}>🌟</div>
-          <div className="absolute bottom-20 left-20 text-5xl animate-bounce" style={{animationDelay: '2s'}}>✨</div>
-          <div className="absolute bottom-10 right-10 text-4xl animate-bounce" style={{animationDelay: '3s'}}>🎯</div>
-          <div className="absolute top-1/2 left-10 text-3xl animate-bounce" style={{animationDelay: '4s'}}>🚀</div>
-          <div className="absolute top-1/3 right-10 text-4xl animate-bounce" style={{animationDelay: '5s'}}>🎉</div>
+          <div className="absolute top-10 left-10 text-4xl" style={{animationDelay: '0s'}}>⭐</div>
+          <div className="absolute top-20 right-20 text-3xl" style={{animationDelay: '1s'}}>🌟</div>
+          <div className="absolute bottom-20 left-20 text-5xl" style={{animationDelay: '2s'}}>✨</div>
+          <div className="absolute bottom-10 right-10 text-4xl" style={{animationDelay: '3s'}}>🎯</div>
+          <div className="absolute top-1/2 left-10 text-3xl" style={{animationDelay: '4s'}}>🚀</div>
+          <div className="absolute top-1/3 right-10 text-4xl" style={{animationDelay: '5s'}}>🎉</div>
         </div>
         
         <div className="container mx-auto px-4 py-12 relative z-10">
           {/* Header */}
           <div className="text-center mb-12">
             <div className="mb-8">
-              <h1 className="text-7xl font-bold mb-4 bg-gradient-rainbow bg-clip-text text-transparent">
-                Quiz Buddy
-              </h1>
-              <div className="inline-block bg-gradient-to-r from-primary to-secondary p-4 rounded-full shadow-lg">
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <div className="text-6xl">🤖</div>
+                <h1 className="text-7xl font-bold bg-gradient-rainbow bg-clip-text text-transparent">
+                  Quiz Buddy
+                </h1>
+              </div>
+              <div className="inline-block bg-purple-600 p-4 rounded-full shadow-lg">
                 <p className="text-xl font-semibold text-white">
                   🎓 Choose a topic to start your learning adventure! 🌈
                 </p>
