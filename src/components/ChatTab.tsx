@@ -86,7 +86,7 @@ export function ChatTab({ isOpen, onToggle, currentTopic }: ChatTabProps) {
         onClick={onToggle}
         className={cn(
           "rounded-full w-14 h-14 shadow-lg transition-all duration-300",
-          isOpen ? "bg-destructive hover:bg-destructive/90" : "bg-primary hover:bg-primary/90 animate-pulse-glow"
+          isOpen ? "bg-destructive hover:bg-destructive/90" : "bg-primary hover:bg-primary/90"
         )}
       >
         {isOpen ? (

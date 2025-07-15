@@ -53,32 +53,48 @@ const Index = () => {
 
   if (appState === 'home') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-accent/20 to-primary/10">
-        <div className="container mx-auto px-4 py-12">
+      <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 relative overflow-hidden">
+        {/* Fun background elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-10 left-10 text-4xl animate-bounce" style={{animationDelay: '0s'}}>⭐</div>
+          <div className="absolute top-20 right-20 text-3xl animate-bounce" style={{animationDelay: '1s'}}>🌟</div>
+          <div className="absolute bottom-20 left-20 text-5xl animate-bounce" style={{animationDelay: '2s'}}>✨</div>
+          <div className="absolute bottom-10 right-10 text-4xl animate-bounce" style={{animationDelay: '3s'}}>🎯</div>
+          <div className="absolute top-1/2 left-10 text-3xl animate-bounce" style={{animationDelay: '4s'}}>🚀</div>
+          <div className="absolute top-1/3 right-10 text-4xl animate-bounce" style={{animationDelay: '5s'}}>🎉</div>
+        </div>
+        
+        <div className="container mx-auto px-4 py-12 relative z-10">
           {/* Header */}
           <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Target className="h-12 w-12 text-primary" />
-              <h1 className="text-4xl font-bold text-foreground">
+            <div className="mb-8">
+              <h1 className="text-7xl font-bold mb-4 bg-gradient-rainbow bg-clip-text text-transparent">
                 Quiz Buddy
               </h1>
+              <div className="inline-block bg-gradient-to-r from-primary to-secondary p-4 rounded-full shadow-lg">
+                <p className="text-xl font-semibold text-white">
+                  🎓 Choose a topic to start your learning adventure! 🌈
+                </p>
+              </div>
             </div>
-            <p className="text-xl text-muted-foreground mb-8">
-              Choose a topic to start learning!
-            </p>
           </div>
 
           {/* Topic Buttons */}
-          <div className="flex flex-wrap justify-center gap-8 mb-12">
+          <div className="flex flex-wrap justify-center gap-12 mb-12">
             {quizTopics.map((topic, index) => (
-              <TopicButton
-                key={topic.id}
-                icon={<span className="text-4xl">{topic.emoji}</span>}
-                title={topic.title}
-                description={topic.description}
-                color={topic.color}
-                onClick={() => handleTopicSelect(topic)}
-              />
+              <div 
+                key={topic.id} 
+                className="animate-fade-in"
+                style={{animationDelay: `${index * 0.2}s`}}
+              >
+                <TopicButton
+                  icon={topic.emoji}
+                  title={topic.title}
+                  description={topic.description}
+                  color={topic.color}
+                  onClick={() => handleTopicSelect(topic)}
+                />
+              </div>
             ))}
           </div>
 

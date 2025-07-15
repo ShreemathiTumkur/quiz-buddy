@@ -18,23 +18,31 @@ export function TopicButton({ icon, title, description, color, onClick, classNam
   };
 
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'group relative w-48 h-48 rounded-full border-4 transition-all duration-300',
-        'hover:scale-105 hover:shadow-xl active:scale-95',
-        colorClasses[color],
-        className
-      )}
-    >
-      <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-        <div className="text-8xl mb-2">
-          {icon}
+    <div className="flex flex-col items-center space-y-4">
+      {/* Circle with emoji only */}
+      <button
+        onClick={onClick}
+        className={cn(
+          'group relative w-32 h-32 rounded-full border-4 transition-all duration-300',
+          'hover:scale-110 hover:shadow-2xl active:scale-95',
+          'hover:rotate-12 transform-gpu',
+          colorClasses[color],
+          className
+        )}
+      >
+        <div className="flex items-center justify-center h-full">
+          <div className="text-7xl transform group-hover:scale-110 transition-transform duration-300">
+            {icon}
+          </div>
         </div>
-        <h3 className="text-lg font-bold mb-1 leading-tight">{title}</h3>
-        <p className="text-xs opacity-80 leading-tight">{description}</p>
+        <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </button>
+      
+      {/* Title and description outside */}
+      <div className="text-center space-y-1">
+        <h3 className="text-2xl font-bold text-foreground">{title}</h3>
+        <p className="text-sm font-semibold text-muted-foreground">{description}</p>
       </div>
-      <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-    </button>
+    </div>
   );
 }
