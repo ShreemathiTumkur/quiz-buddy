@@ -67,15 +67,8 @@ const Index = () => {
     }
   }, [user, loading, navigate]);
 
-  const handleTopicSelect = (topicName: string) => {
-    // Find the corresponding hardcoded topic for quiz functionality
-    const hardcodedTopic = quizTopics.find(qt => qt.title === topicName);
-    if (hardcodedTopic) {
-      setSelectedTopic(hardcodedTopic);
-      setCurrentQuestionIndex(0);
-      setScore(0);
-      setAppState('quiz');
-    }
+  const handleTopicSelect = (topicId: string) => {
+    navigate(`/quiz/${topicId}`);
   };
 
   const handleAnswer = (isCorrect: boolean) => {
@@ -192,7 +185,7 @@ const Index = () => {
                     <TopicButton
                       emoji={topic.emoji}
                       title={topic.name}
-                      onClick={() => handleTopicSelect(topic.name)}
+                      onClick={() => handleTopicSelect(topic.id)}
                     />
                   </div>
                 ))}
