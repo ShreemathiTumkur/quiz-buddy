@@ -204,6 +204,7 @@ Remember: All content must be completely safe and appropriate for young children
     const questionsToInsert = questions.map((q: any) => ({
       topic_id: topicId,
       text: q.text,
+      question_type: q.type,
       options: q.options,
       correct_answer: q.correct_answer,
       fun_fact: q.fun_fact,

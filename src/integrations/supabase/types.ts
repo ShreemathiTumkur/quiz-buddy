@@ -50,6 +50,7 @@ export type Database = {
           id: string
           media_url: string | null
           options: string[] | null
+          question_type: string | null
           text: string
           topic_id: string | null
         }
@@ -61,6 +62,7 @@ export type Database = {
           id?: string
           media_url?: string | null
           options?: string[] | null
+          question_type?: string | null
           text: string
           topic_id?: string | null
         }
@@ -72,6 +74,7 @@ export type Database = {
           id?: string
           media_url?: string | null
           options?: string[] | null
+          question_type?: string | null
           text?: string
           topic_id?: string | null
         }

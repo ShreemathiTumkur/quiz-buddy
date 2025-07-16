@@ -13,8 +13,9 @@ import confetti from 'canvas-confetti';
 interface Question {
   id: string;
   text: string;
+  question_type: string;
   fun_fact: string | null;
-  options?: string[];
+  options?: string[] | null;
   correct_answer: string;
 }
 
@@ -79,7 +80,7 @@ const Quiz = () => {
         // Fetch 10 random questions for this topic
         const { data: questionsData, error: questionsError } = await supabase
           .from('questions')
-          .select('id, text, fun_fact, options, correct_answer')
+          .select('id, text, question_type, fun_fact, options, correct_answer')
           .eq('topic_id', topicId)
           .limit(10);
 
