@@ -79,9 +79,8 @@ const Quiz = () => {
         // Fetch 10 random questions for this topic
         const { data: questionsData, error: questionsError } = await supabase
           .from('questions')
-          .select('id, text, fun_fact')
+          .select('id, text, fun_fact, options, correct_answer')
           .eq('topic_id', topicId)
-          .order('id', { ascending: false }) // Simple randomization
           .limit(10);
 
         if (questionsError) {
@@ -103,15 +102,8 @@ const Quiz = () => {
           return;
         }
 
-        // Transform questions and add mock options for demo purposes
-        const transformedQuestions: Question[] = questionsData.map((q) => ({
-          ...q,
-          // Mock options - in real implementation, these would come from the database
-          options: ['Option A', 'Option B', 'Option C', 'Option D'],
-          correct_answer: 'Option A' // Mock correct answer
-        }));
-
-        setQuestions(transformedQuestions);
+        // Use actual questions from database
+        setQuestions(questionsData as Question[]);
       } catch (error) {
         console.error('Error fetching quiz data:', error);
         toast({

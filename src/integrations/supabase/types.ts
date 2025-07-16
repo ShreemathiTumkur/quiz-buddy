@@ -43,29 +43,35 @@ export type Database = {
       }
       questions: {
         Row: {
+          correct_answer: string | null
           created_at: string | null
           difficulty: number | null
           fun_fact: string | null
           id: string
           media_url: string | null
+          options: string[] | null
           text: string
           topic_id: string | null
         }
         Insert: {
+          correct_answer?: string | null
           created_at?: string | null
           difficulty?: number | null
           fun_fact?: string | null
           id?: string
           media_url?: string | null
+          options?: string[] | null
           text: string
           topic_id?: string | null
         }
         Update: {
+          correct_answer?: string | null
           created_at?: string | null
           difficulty?: number | null
           fun_fact?: string | null
           id?: string
           media_url?: string | null
+          options?: string[] | null
           text?: string
           topic_id?: string | null
         }
