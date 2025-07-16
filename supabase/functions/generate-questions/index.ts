@@ -229,7 +229,11 @@ Remember: All content must be completely safe and appropriate for young children
 
     if (insertError) {
       console.error('Error inserting questions:', insertError);
-      return new Response(JSON.stringify({ error: 'Failed to save questions to database' }), {
+      console.error('Questions to insert:', JSON.stringify(questionsToInsert, null, 2));
+      return new Response(JSON.stringify({ 
+        error: 'Failed to save questions to database',
+        details: insertError.message 
+      }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
