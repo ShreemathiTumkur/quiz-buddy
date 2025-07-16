@@ -86,8 +86,15 @@ serve(async (req) => {
 
     console.log(`✅ Topic found: ${topic.name}`);
 
-    // Create comprehensive child-safety prompt for OpenAI
-    const prompt = `Create exactly 10 educational quiz questions for children aged 6-10 years old about "${topic.name}".
+    // Create a simplified prompt for Telugu to avoid potential issues
+    const prompt = topic.name.toLowerCase().includes('telugu') 
+      ? `Create exactly 5 simple Telugu vocabulary questions for children. Each question should ask for the Telugu word for a common English word like "water", "mother", "father", "sun", "tree". 
+
+Format as JSON array:
+[{"text": "What is the Telugu word for 'Water'?", "type": "voice_input", "options": null, "correct_answer": "నీరు", "fun_fact": "Water is essential for life!"}]
+
+Make exactly 5 questions about basic Telugu vocabulary.`
+      : `Create exactly 10 educational quiz questions for children aged 6-10 years old about "${topic.name}".
 
 CRITICAL CHILD SAFETY REQUIREMENTS:
 - Content MUST be 100% appropriate for young children (ages 6-10)
@@ -106,17 +113,11 @@ CONTENT GUIDELINES:
 - No complex or abstract concepts beyond elementary level
 
 QUESTION TYPE VARIETY:
-${topic.name.toLowerCase().includes('telugu') ? 
-  `For Telugu topics, create ONLY vocabulary questions:
-- Ask for Telugu words for simple English words
-- Use "voice_input" type for all Telugu questions (children will speak the answer)
-- Focus on basic vocabulary: family members, colors, numbers, animals, body parts, food items
-- Example: "What is the Telugu word for 'Mother'?" (Answer: "అమ్మ")` :
-  `Create a mix of different question types (distribute evenly):
+Create a mix of different question types (distribute evenly):
 1. Multiple Choice (4 options)
 2. True/False 
 3. Fill in the blank
-4. Yes/No questions`}
+4. Yes/No questions
 
 SPECIFIC REQUIREMENTS:
 - Each question should be age-appropriate with simple, clear language
@@ -129,15 +130,15 @@ Format your response as a JSON array with exactly this structure:
 [
   {
     "text": "Question text here?",
-    "type": "${topic.name.toLowerCase().includes('telugu') ? 'voice_input' : 'multiple_choice|true_false|fill_blank|yes_no|voice_input'}",
-    "options": ${topic.name.toLowerCase().includes('telugu') ? 'null' : '["Option A", "Option B", "Option C", "Option D"] OR ["True", "False"] OR ["Yes", "No"] OR null for fill_blank/voice_input'},
+    "type": "multiple_choice|true_false|fill_blank|yes_no|voice_input",
+    "options": ["Option A", "Option B", "Option C", "Option D"] OR ["True", "False"] OR ["Yes", "No"] OR null for fill_blank/voice_input,
     "correct_answer": "The correct answer",
     "fun_fact": "Fun educational fact here!"
   }
 ]
 
 Topic: ${topic.name}
-Remember: All content must be completely safe and appropriate for young children. Generate exactly 10 questions${topic.name.toLowerCase().includes('telugu') ? ' focused on basic Telugu vocabulary' : ' with a good mix of question types'} now:`;
+Remember: All content must be completely safe and appropriate for young children. Generate exactly 10 questions with a good mix of question types now:`;
 
     // Call OpenAI API
     console.log('🤖 Making request to OpenAI API...');
@@ -228,11 +229,14 @@ Remember: All content must be completely safe and appropriate for young children
       });
     }
 
-    if (!Array.isArray(questions) || questions.length !== 10) {
-      console.error(`❌ Invalid questions format: expected 10 questions, got ${questions.length}`);
+    const isTeluguTopic = topic.name.toLowerCase().includes('telugu');
+    const expectedQuestionCount = isTeluguTopic ? 5 : 10;
+    
+    if (!Array.isArray(questions) || questions.length !== expectedQuestionCount) {
+      console.error(`❌ Invalid questions format: expected ${expectedQuestionCount} questions, got ${questions.length}`);
       return new Response(JSON.stringify({ 
         error: 'Generated questions format is invalid',
-        details: `Expected 10 questions, got ${questions.length}` 
+        details: `Expected ${expectedQuestionCount} questions, got ${questions.length}` 
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
