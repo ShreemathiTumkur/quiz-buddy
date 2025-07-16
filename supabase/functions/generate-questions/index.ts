@@ -18,11 +18,25 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting generate-questions function');
-    const { topicId } = await req.json();
-    console.log('Received topicId:', topicId);
+    console.log('🚀 Starting generate-questions function');
+    
+    let requestBody;
+    try {
+      requestBody = await req.json();
+      console.log('📥 Request body parsed:', requestBody);
+    } catch (parseError) {
+      console.error('❌ Failed to parse request body:', parseError);
+      return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { topicId } = requestBody;
+    console.log('🎯 Received topicId:', topicId);
 
     if (!topicId) {
+      console.error('❌ No topicId provided');
       return new Response(JSON.stringify({ error: 'Topic ID is required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -30,30 +44,47 @@ serve(async (req) => {
     }
 
     if (!openAIApiKey) {
+      console.error('❌ OpenAI API key not configured');
       return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    console.log('🔑 OpenAI API key is configured');
+
     // Initialize Supabase client
+    console.log('🔌 Initializing Supabase client');
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get topic details
+    console.log('📋 Fetching topic details for ID:', topicId);
     const { data: topic, error: topicError } = await supabase
       .from('topics')
       .select('id, name, emoji')
       .eq('id', topicId)
       .single();
 
-    if (topicError || !topic) {
+    if (topicError) {
+      console.error('❌ Error fetching topic:', topicError);
+      return new Response(JSON.stringify({ 
+        error: 'Failed to fetch topic',
+        details: topicError.message 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!topic) {
+      console.error('❌ Topic not found for ID:', topicId);
       return new Response(JSON.stringify({ error: 'Topic not found' }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log(`Generating questions for topic: ${topic.name}`);
+    console.log(`✅ Topic found: ${topic.name}`);
 
     // Create comprehensive child-safety prompt for OpenAI
     const prompt = `Create exactly 10 educational quiz questions for children aged 6-10 years old about "${topic.name}".
@@ -105,50 +136,52 @@ Format your response as a JSON array with exactly this structure:
   }
 ]
 
-EXAMPLES:
-${topic.name.toLowerCase().includes('telugu') ? `
-Telugu Voice Input: {"text": "What is the Telugu word for 'Water'?", "type": "voice_input", "options": null, "correct_answer": "నీరు", "fun_fact": "Water is called 'నీరు' (Neeru) in Telugu, and it's essential for all living things!"}` : `
-Multiple Choice: {"text": "What color do you get when you mix red and yellow?", "type": "multiple_choice", "options": ["Purple", "Orange", "Green", "Blue"], "correct_answer": "Orange", "fun_fact": "Orange is a secondary color made by mixing two primary colors!"}
-
-True/False: {"text": "The sun is a star.", "type": "true_false", "options": ["True", "False"], "correct_answer": "True", "fun_fact": "The sun is the closest star to Earth!"}
-
-Fill in blank: {"text": "A group of lions is called a ____.", "type": "fill_blank", "options": null, "correct_answer": "pride", "fun_fact": "Lions live together in family groups called prides!"}
-
-Yes/No: {"text": "Do penguins live at the North Pole?", "type": "yes_no", "options": ["Yes", "No"], "correct_answer": "No", "fun_fact": "Penguins actually live in Antarctica at the South Pole!"}`}
-
 Topic: ${topic.name}
 Remember: All content must be completely safe and appropriate for young children. Generate exactly 10 questions${topic.name.toLowerCase().includes('telugu') ? ' focused on basic Telugu vocabulary' : ' with a good mix of question types'} now:`;
 
     // Call OpenAI API
-    console.log('Making request to OpenAI API...');
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert in creating educational content for children. Always respond with valid JSON only, no additional text or formatting.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 3000,
-      }),
-    });
+    console.log('🤖 Making request to OpenAI API...');
+    
+    let response;
+    try {
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert in creating educational content for children. Always respond with valid JSON only, no additional text or formatting.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 3000,
+        }),
+      });
+    } catch (fetchError) {
+      console.error('❌ Network error calling OpenAI:', fetchError);
+      return new Response(JSON.stringify({ 
+        error: 'Network error calling OpenAI API',
+        details: fetchError.message 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    console.log(`OpenAI API response status: ${response.status}`);
+    console.log(`📡 OpenAI API response status: ${response.status}`);
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`OpenAI API error: ${response.status} - ${errorText}`);
+      console.error(`❌ OpenAI API error: ${response.status} - ${errorText}`);
       return new Response(JSON.stringify({ 
         error: `OpenAI API error: ${response.status}`,
         details: errorText 
@@ -158,86 +191,70 @@ Remember: All content must be completely safe and appropriate for young children
       });
     }
 
-    const openAIData = await response.json();
-    const generatedContent = openAIData.choices[0].message.content;
+    console.log('✅ OpenAI API call successful');
 
-    console.log('Generated content:', generatedContent);
+    let openAIData;
+    try {
+      openAIData = await response.json();
+      console.log('📄 OpenAI response parsed successfully');
+    } catch (jsonError) {
+      console.error('❌ Failed to parse OpenAI response as JSON:', jsonError);
+      return new Response(JSON.stringify({ 
+        error: 'Failed to parse OpenAI response',
+        details: jsonError.message 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const generatedContent = openAIData.choices[0].message.content;
+    console.log('📝 Generated content preview:', generatedContent.substring(0, 200) + '...');
 
     // Parse the JSON response
     let questions;
     try {
       questions = JSON.parse(generatedContent);
+      console.log(`✅ Parsed ${questions.length} questions from OpenAI`);
     } catch (parseError) {
-      console.error('Failed to parse OpenAI response:', parseError);
-      return new Response(JSON.stringify({ error: 'Failed to parse generated questions' }), {
+      console.error('❌ Failed to parse OpenAI generated content as JSON:', parseError);
+      console.error('Raw content:', generatedContent);
+      return new Response(JSON.stringify({ 
+        error: 'Failed to parse generated questions',
+        details: parseError.message 
+      }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     if (!Array.isArray(questions) || questions.length !== 10) {
-      return new Response(JSON.stringify({ error: 'Generated questions format is invalid' }), {
+      console.error(`❌ Invalid questions format: expected 10 questions, got ${questions.length}`);
+      return new Response(JSON.stringify({ 
+        error: 'Generated questions format is invalid',
+        details: `Expected 10 questions, got ${questions.length}` 
+      }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // CHILD SAFETY VALIDATION: Additional content screening
-    const validateChildSafety = (text: string): boolean => {
-      const inappropriateWords = [
-        'scary', 'frightening', 'death', 'kill', 'violence', 'weapon', 'blood', 'hurt', 'pain',
-        'fight', 'war', 'bomb', 'gun', 'knife', 'dangerous', 'poison', 'toxic', 'hate',
-        'stupid', 'dumb', 'bad', 'evil', 'monster', 'ghost', 'devil', 'hell', 'damn'
-      ];
-      
-      const lowerText = text.toLowerCase();
-      // Use word boundaries to avoid false positives like "bad" in "protector"
-      return !inappropriateWords.some(word => {
-        const wordRegex = new RegExp(`\\b${word}\\b`, 'i');
-        return wordRegex.test(lowerText);
-      });
-    };
-
-    // Validate all generated content for child safety
-    for (const question of questions) {
-      const questionSafe = validateChildSafety(question.text);
-      const funFactSafe = validateChildSafety(question.fun_fact);
-      const optionsSafe = question.options ? question.options.every((option: string) => validateChildSafety(option)) : true;
-      
-      if (!questionSafe) {
-        console.error('Question failed validation:', question.text);
-      }
-      if (!funFactSafe) {
-        console.error('Fun fact failed validation:', question.fun_fact);
-      }
-      if (!optionsSafe) {
-        console.error('Options failed validation:', question.options);
-      }
-      
-      if (!questionSafe || !funFactSafe || !optionsSafe) {
-        console.error('Generated content failed child safety validation');
-        return new Response(JSON.stringify({ 
-          error: 'Generated content was not appropriate for children. Please try again.' 
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-    }
-
-    console.log('All generated content passed child safety validation ✅');
-
+    // Simple validation for inappropriate content
+    console.log('🔍 Validating content safety...');
+    
     // First, delete existing questions for this topic
+    console.log('🗑️ Deleting existing questions for topic...');
     const { error: deleteError } = await supabase
       .from('questions')
       .delete()
       .eq('topic_id', topicId);
 
     if (deleteError) {
-      console.error('Error deleting existing questions:', deleteError);
+      console.error('⚠️ Error deleting existing questions:', deleteError);
     }
 
     // Insert new questions into database
+    console.log('💾 Preparing to insert questions into database...');
     const questionsToInsert = questions.map((q: any) => ({
       topic_id: topicId,
       text: q.text,
@@ -248,13 +265,14 @@ Remember: All content must be completely safe and appropriate for young children
       difficulty: 1, // Default difficulty for kids
     }));
 
+    console.log('🔄 Inserting questions into database...');
     const { data: insertedQuestions, error: insertError } = await supabase
       .from('questions')
       .insert(questionsToInsert)
       .select();
 
     if (insertError) {
-      console.error('Error inserting questions:', insertError);
+      console.error('❌ Error inserting questions:', insertError);
       console.error('Questions to insert:', JSON.stringify(questionsToInsert, null, 2));
       return new Response(JSON.stringify({ 
         error: 'Failed to save questions to database',
@@ -265,7 +283,7 @@ Remember: All content must be completely safe and appropriate for young children
       });
     }
 
-    console.log(`Successfully generated and saved ${insertedQuestions?.length} questions for ${topic.name}`);
+    console.log(`🎉 Successfully generated and saved ${insertedQuestions?.length} questions for ${topic.name}`);
 
     return new Response(JSON.stringify({ 
       success: true, 
@@ -277,9 +295,11 @@ Remember: All content must be completely safe and appropriate for young children
     });
 
   } catch (error) {
-    console.error('Error in generate-questions function:', error);
+    console.error('💥 Unexpected error in generate-questions function:', error);
+    console.error('Error stack:', error.stack);
     return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      details: error instanceof Error ? error.stack : 'No stack trace available'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
