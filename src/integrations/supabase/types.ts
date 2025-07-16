@@ -41,6 +41,65 @@ export type Database = {
         }
         Relationships: []
       }
+      questions: {
+        Row: {
+          created_at: string | null
+          difficulty: number | null
+          fun_fact: string | null
+          id: string
+          media_url: string | null
+          text: string
+          topic_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          difficulty?: number | null
+          fun_fact?: string | null
+          id?: string
+          media_url?: string | null
+          text: string
+          topic_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          difficulty?: number | null
+          fun_fact?: string | null
+          id?: string
+          media_url?: string | null
+          text?: string
+          topic_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      topics: {
+        Row: {
+          created_at: string | null
+          emoji: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          emoji?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          emoji?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

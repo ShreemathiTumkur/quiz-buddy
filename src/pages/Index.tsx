@@ -5,6 +5,7 @@ import { TopicButton } from '@/components/TopicButton';
 import { QuizQuestion } from '@/components/QuizQuestion';
 import { QuizResults } from '@/components/QuizResults';
 import { ChatTab } from '@/components/ChatTab';
+import { NamePrompt } from '@/components/NamePrompt';
 import UserProfile from '@/components/UserProfile';
 import { quizTopics, QuizTopic } from '@/data/quizData';
 import { Button } from '@/components/ui/button';
@@ -90,6 +91,11 @@ const Index = () => {
     );
   }
 
+  // Show name prompt if user doesn't have a display name
+  if (!profile?.display_name) {
+    return <NamePrompt onComplete={() => {/* Profile will be refetched automatically */}} />;
+  }
+
   if (appState === 'home') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 relative overflow-hidden">
@@ -124,7 +130,7 @@ const Index = () => {
               </div>
               <div className="inline-block bg-purple-600 p-4 rounded-full shadow-lg">
                 <p className="text-xl font-semibold text-white">
-                  🎓 Welcome back, {profile?.display_name}! Choose a topic to start your learning adventure! 🌈
+                  🎓 Welcome to QuizBuddy, {profile?.display_name}! Choose a topic to start your learning adventure! 🌈
                 </p>
               </div>
             </div>
