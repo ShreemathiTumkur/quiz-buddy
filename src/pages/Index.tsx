@@ -59,6 +59,24 @@ const Index = () => {
     // The questions are already updated in the database
   };
 
+  const handleTopicsUpdated = async () => {
+    // Re-fetch topics when new ones are added
+    try {
+      const { data, error } = await supabase
+        .from('topics')
+        .select('id, name, emoji')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching topics:', error);
+      } else {
+        setTopics(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching topics:', error);
+    }
+  };
+
   // Redirect to auth if not logged in
   useEffect(() => {
     if (!loading && !user) {
@@ -207,6 +225,7 @@ const Index = () => {
               <QuestionGenerator 
                 topics={topics} 
                 onQuestionsGenerated={handleQuestionsGenerated}
+                onTopicsUpdated={handleTopicsUpdated}
               />
             </TabsContent>
           </Tabs>

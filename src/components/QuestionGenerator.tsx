@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Sparkles, RefreshCw } from 'lucide-react';
+import { Loader2, Sparkles, RefreshCw, Plus, BookOpen } from 'lucide-react';
 
 interface Topic {
   id: string;
@@ -14,10 +15,14 @@ interface Topic {
 interface QuestionGeneratorProps {
   topics: Topic[];
   onQuestionsGenerated: () => void;
+  onTopicsUpdated: () => void;
 }
 
-export const QuestionGenerator = ({ topics, onQuestionsGenerated }: QuestionGeneratorProps) => {
+export const QuestionGenerator = ({ topics, onQuestionsGenerated, onTopicsUpdated }: QuestionGeneratorProps) => {
   const [generatingTopics, setGeneratingTopics] = useState<Set<string>>(new Set());
+  const [isAddingTopic, setIsAddingTopic] = useState(false);
+  const [newTopicName, setNewTopicName] = useState('');
+  const [newTopicEmoji, setNewTopicEmoji] = useState('');
   const { toast } = useToast();
 
   const generateQuestionsForTopic = async (topicId: string, topicName: string) => {
@@ -59,6 +64,53 @@ export const QuestionGenerator = ({ topics, onQuestionsGenerated }: QuestionGene
     }
   };
 
+  const addNewTopic = async () => {
+    if (!newTopicName.trim() || !newTopicEmoji.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter both topic name and emoji",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAddingTopic(true);
+    try {
+      const { data, error } = await supabase
+        .from('topics')
+        .insert([
+          {
+            name: newTopicName.trim(),
+            emoji: newTopicEmoji.trim()
+          }
+        ])
+        .select();
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Topic Added! 🎉",
+        description: `${newTopicEmoji} ${newTopicName} has been added successfully`,
+      });
+
+      setNewTopicName('');
+      setNewTopicEmoji('');
+      onTopicsUpdated();
+
+    } catch (error) {
+      console.error('Error adding topic:', error);
+      toast({
+        title: "Error adding topic",
+        description: error instanceof Error ? error.message : 'Something went wrong',
+        variant: "destructive",
+      });
+    } finally {
+      setIsAddingTopic(false);
+    }
+  };
+
   const generateAllQuestions = async () => {
     for (const topic of topics) {
       if (!generatingTopics.has(topic.id)) {
@@ -83,11 +135,100 @@ export const QuestionGenerator = ({ topics, onQuestionsGenerated }: QuestionGene
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Add New Topic Section */}
+        <Card className="border-dashed border-2 border-primary/20">
+          <CardContent className="p-6">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-semibold flex items-center justify-center gap-2">
+                <Plus className="h-5 w-5" />
+                Add New Topic
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Create new learning topics like Science, Animals, or anything you want!
+              </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1">
+                <Input
+                  placeholder="Topic name (e.g., Science, Animals)"
+                  value={newTopicName}
+                  onChange={(e) => setNewTopicName(e.target.value)}
+                  disabled={isAddingTopic}
+                />
+              </div>
+              <div className="w-20">
+                <Input
+                  placeholder="🔬"
+                  value={newTopicEmoji}
+                  onChange={(e) => setNewTopicEmoji(e.target.value)}
+                  disabled={isAddingTopic}
+                  className="text-center"
+                />
+              </div>
+              <Button
+                onClick={addNewTopic}
+                disabled={isAddingTopic || !newTopicName.trim() || !newTopicEmoji.trim()}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isAddingTopic ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Topic
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            {/* Quick Add Buttons for Popular Topics */}
+            <div className="flex flex-wrap gap-2 mt-4 justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setNewTopicName('Science');
+                  setNewTopicEmoji('🔬');
+                }}
+                disabled={isAddingTopic}
+              >
+                🔬 Science
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setNewTopicName('Animals');
+                  setNewTopicEmoji('🐾');
+                }}
+                disabled={isAddingTopic}
+              >
+                🐾 Animals
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setNewTopicName('Geography');
+                  setNewTopicEmoji('🌍');
+                }}
+                disabled={isAddingTopic}
+              >
+                🌍 Geography
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Generate All Button */}
         <div className="text-center">
           <Button 
             onClick={generateAllQuestions}
-            disabled={isGeneratingAny}
+            disabled={isGeneratingAny || topics.length === 0}
             size="lg"
             className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
           >
