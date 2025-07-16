@@ -179,11 +179,19 @@ const Index = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <div className="text-6xl mb-4">📚</div>
-                    <h3 className="text-2xl font-bold text-foreground mb-2">No Topics Yet!</h3>
-                    <p className="text-lg text-muted-foreground">
-                      Ask your grown-up to add topics! 👨‍👩‍👧‍👦
+                    <div className="text-6xl mb-4">🎯</div>
+                    <h3 className="text-2xl font-bold text-foreground mb-2">Ready to Start Learning!</h3>
+                    <p className="text-lg text-muted-foreground mb-4">
+                      Let's generate some questions for you to practice with!
                     </p>
+                    <Button 
+                      onClick={() => setActiveTab('manage')}
+                      size="lg"
+                      className="animate-pulse"
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Generate Questions
+                    </Button>
                   </div>
                 )}
               </div>
