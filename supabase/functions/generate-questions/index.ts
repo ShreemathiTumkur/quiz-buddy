@@ -127,7 +127,7 @@ Remember: All content must be completely safe and appropriate for young children
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -139,7 +139,7 @@ Remember: All content must be completely safe and appropriate for young children
           }
         ],
         temperature: 0.7,
-        max_tokens: 4000,
+        max_tokens: 3000,
       }),
     });
 
