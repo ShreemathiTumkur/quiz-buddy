@@ -144,6 +144,7 @@ Remember: All content must be completely safe and appropriate for young children
     });
 
     if (!response.ok) {
+      console.error(`OpenAI API error: ${response.status} - ${await response.text()}`);
       throw new Error(`OpenAI API error: ${response.status}`);
     }
 
