@@ -245,11 +245,23 @@ const Quiz = () => {
       <div className="container mx-auto max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="text-6xl">{topic?.emoji}</div>
-            <h1 className="text-4xl font-bold text-foreground font-fredoka">
-              {topic?.name}
-            </h1>
+          <div className="flex items-center justify-between mb-4">
+            <Button 
+              onClick={() => navigate('/')} 
+              variant="outline" 
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Home className="h-4 w-4" />
+              Home
+            </Button>
+            <div className="flex items-center gap-4">
+              <div className="text-6xl">{topic?.emoji}</div>
+              <h1 className="text-4xl font-bold text-foreground font-fredoka">
+                {topic?.name}
+              </h1>
+            </div>
+            <div className="w-20"></div> {/* Spacer for centering */}
           </div>
           <div className="flex items-center justify-between mb-4">
             <span className="text-lg font-semibold">
