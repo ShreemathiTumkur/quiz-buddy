@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting Telugu question generation');
+    console.log('Starting question generation');
     
     const { topicId } = await req.json();
     console.log('TopicId:', topicId);
@@ -41,171 +41,80 @@ serve(async (req) => {
 
     console.log(`Topic: ${topic.name}`);
 
-    // Check if this is a Math topic and use appropriate questions
-    if (topic.name.toLowerCase().includes('math')) {
-      // For Math topics, create more challenging math questions
-      const mathQuestions = [
-        {
-          text: "What is 1,247 + 856?",
-          type: "fill_blank",
-          options: null,
-          correct_answer: "2103",
-          fun_fact: "When adding large numbers, line up the digits by place value!"
-        },
-        {
-          text: "What is 3,421 - 1,789?",
-          type: "fill_blank", 
-          options: null,
-          correct_answer: "1632",
-          fun_fact: "Sometimes you need to borrow from the next column when subtracting!"
-        },
-        {
-          text: "What is 567 + 834?",
-          type: "multiple_choice",
-          options: ["1401", "1301", "1201", "1501"],
-          correct_answer: "1401",
-          fun_fact: "Adding hundreds, tens, and ones separately can help you get the right answer!"
-        },
-        {
-          text: "What is 2,000 - 456?",
-          type: "fill_blank",
-          options: null,
-          correct_answer: "1544", 
-          fun_fact: "When subtracting from numbers ending in zeros, you might need to borrow several times!"
-        },
-        {
-          text: "What is 7 × 8?",
-          type: "multiple_choice",
-          options: ["54", "56", "58", "52"],
-          correct_answer: "56",
-          fun_fact: "Multiplication tables help you solve problems quickly!"
-        },
-        {
-          text: "What is 9 × 6?",
-          type: "fill_blank",
-          options: null,
-          correct_answer: "54",
-          fun_fact: "You can think of 9 × 6 as (10 × 6) - 6 = 60 - 6 = 54!"
-        },
-        {
-          text: "What is 42 ÷ 7?",
-          type: "multiple_choice",
-          options: ["5", "6", "7", "8"],
-          correct_answer: "6",
-          fun_fact: "Division is the opposite of multiplication: 6 × 7 = 42!"
-        },
-        {
-          text: "What is 81 ÷ 9?",
-          type: "fill_blank",
-          options: null,
-          correct_answer: "9",
-          fun_fact: "When you divide a number by itself, you always get 1, but 81 ÷ 9 = 9!"
-        },
-        {
-          text: "What is 1,458 + 697?",
-          type: "fill_blank",
-          options: null,
-          correct_answer: "2155",
-          fun_fact: "Always start adding from the ones place and work your way left!"
-        },
-        {
-          text: "What is 4 × 9?",
-          type: "multiple_choice",
-          options: ["35", "36", "37", "38"],
-          correct_answer: "36",
-          fun_fact: "4 × 9 is the same as 4 groups of 9 things each!"
-        }
-      ];
+    let questionsToInsert;
 
-      // Delete existing questions for this topic
-      console.log('Deleting existing questions...');
-      const { error: deleteError } = await supabase
-        .from('questions')
-        .delete()
-        .eq('topic_id', topicId);
+    // Try to use OpenAI for question generation if API key is available
+    if (openAIApiKey) {
+      console.log('Using OpenAI for question generation');
+      
+      try {
+        const prompt = `Generate exactly 10 educational quiz questions for children aged 6-10 about "${topic.name}".
 
-      if (deleteError) {
-        console.error('Error deleting existing questions:', deleteError);
-      }
+        Requirements:
+        - Age-appropriate content for 6-10 year olds
+        - Include multiple choice questions with 4 options each
+        - Include one fun educational fact for each question
+        - Return valid JSON format
+        - Make questions engaging and educational
 
-      // Insert new questions into database
-      console.log('Inserting Math questions...');
-      const questionsToInsert = mathQuestions.map((q) => ({
-        topic_id: topicId,
-        text: q.text,
-        question_type: q.type,
-        options: q.options,
-        correct_answer: q.correct_answer,
-        fun_fact: q.fun_fact,
-        difficulty: 2, // Higher difficulty for Math
-      }));
+        Response format:
+        [
+          {
+            "text": "Question text here?",
+            "options": ["Option A", "Option B", "Option C", "Option D"],
+            "correct_answer": "Option A",
+            "fun_fact": "Educational fact about the answer"
+          }
+        ]`;
 
-      const { data: insertedQuestions, error: insertError } = await supabase
-        .from('questions')
-        .insert(questionsToInsert)
-        .select();
-
-      if (insertError) {
-        console.error('Error inserting questions:', insertError);
-        return new Response(JSON.stringify({ 
-          error: 'Failed to save questions to database',
-          details: insertError.message 
-        }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              { role: 'system', content: 'You are an educational content creator specializing in age-appropriate quiz questions for children. Always return valid JSON.' },
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.7,
+            max_tokens: 2000,
+          }),
         });
+
+        if (!response.ok) {
+          throw new Error(`OpenAI API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const generatedText = data.choices[0].message.content;
+        
+        // Parse the JSON response
+        const generatedQuestions = JSON.parse(generatedText);
+        
+        questionsToInsert = generatedQuestions.map((q: any) => ({
+          topic_id: topicId,
+          text: q.text,
+          question_type: 'multiple_choice',
+          options: q.options,
+          correct_answer: q.correct_answer,
+          fun_fact: q.fun_fact,
+          difficulty: 1,
+        }));
+
+        console.log(`Generated ${questionsToInsert.length} questions using OpenAI`);
+
+      } catch (aiError) {
+        console.error('OpenAI generation failed:', aiError);
+        console.log('Falling back to hardcoded questions');
+        questionsToInsert = getFallbackQuestions(topic, topicId);
       }
-
-      console.log(`Successfully saved ${insertedQuestions?.length} Math questions`);
-
-      return new Response(JSON.stringify({ 
-        success: true, 
-        topicName: topic.name,
-        questionsGenerated: insertedQuestions?.length || 0,
-        questions: insertedQuestions 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    } else {
+      console.log('No OpenAI API key, using fallback questions');
+      questionsToInsert = getFallbackQuestions(topic, topicId);
     }
-
-    // For Telugu, create hardcoded questions to avoid OpenAI issues
-    const teluguQuestions = [
-      {
-        text: "What is the Telugu word for 'Water'?",
-        type: "voice_input",
-        options: null,
-        correct_answer: "నీరు",
-        fun_fact: "Water is called 'నీరు' (Neeru) in Telugu, and it's essential for all living things!"
-      },
-      {
-        text: "What is the Telugu word for 'Mother'?",
-        type: "voice_input", 
-        options: null,
-        correct_answer: "అమ్మ",
-        fun_fact: "In Telugu, we call our mothers 'అమ్మ' (Amma), which shows love and respect!"
-      },
-      {
-        text: "What is the Telugu word for 'Father'?",
-        type: "voice_input",
-        options: null,
-        correct_answer: "నాన్న",
-        fun_fact: "In Telugu, 'Father' is called 'నాన్న' (Nanna), and fathers are very special!"
-      },
-      {
-        text: "What is the Telugu word for 'Sun'?",
-        type: "voice_input",
-        options: null,
-        correct_answer: "సూర్యుడు",
-        fun_fact: "In Telugu, 'Sun' is called 'సూర్యుడు' (Suryudu), and it gives us light and warmth!"
-      },
-      {
-        text: "What is the Telugu word for 'Tree'?",
-        type: "voice_input",
-        options: null,
-        correct_answer: "చెట్టు",
-        fun_fact: "A 'Tree' is called 'చెట్టు' (Chettu) in Telugu, and trees provide shade and oxygen!"
-      }
-    ];
 
     // Delete existing questions for this topic
     console.log('Deleting existing questions...');
@@ -219,17 +128,7 @@ serve(async (req) => {
     }
 
     // Insert new questions into database
-    console.log('Inserting Telugu questions...');
-    const questionsToInsert = teluguQuestions.map((q) => ({
-      topic_id: topicId,
-      text: q.text,
-      question_type: q.type,
-      options: q.options,
-      correct_answer: q.correct_answer,
-      fun_fact: q.fun_fact,
-      difficulty: 1,
-    }));
-
+    console.log('Inserting questions...');
     const { data: insertedQuestions, error: insertError } = await supabase
       .from('questions')
       .insert(questionsToInsert)
@@ -246,7 +145,7 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Successfully saved ${insertedQuestions?.length} Telugu questions`);
+    console.log(`Successfully saved ${insertedQuestions?.length} questions`);
 
     return new Response(JSON.stringify({ 
       success: true, 
@@ -267,3 +166,138 @@ serve(async (req) => {
     });
   }
 });
+
+function getFallbackQuestions(topic: any, topicId: string) {
+  const topicName = topic.name.toLowerCase();
+  
+  if (topicName.includes('math')) {
+    return [
+      {
+        topic_id: topicId,
+        text: "What is 7 + 5?",
+        question_type: "multiple_choice",
+        options: ["10", "12", "14", "11"],
+        correct_answer: "12",
+        fun_fact: "Addition helps us count things together!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "What is 8 × 3?",
+        question_type: "multiple_choice",
+        options: ["21", "24", "18", "27"],
+        correct_answer: "24",
+        fun_fact: "Multiplication is like adding the same number multiple times!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "What is 15 - 7?",
+        question_type: "multiple_choice",
+        options: ["8", "9", "7", "6"],
+        correct_answer: "8",
+        fun_fact: "Subtraction helps us find the difference between numbers!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "How many sides does a triangle have?",
+        question_type: "multiple_choice",
+        options: ["2", "3", "4", "5"],
+        correct_answer: "3",
+        fun_fact: "A triangle is the strongest shape in construction!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "What comes after 19?",
+        question_type: "multiple_choice",
+        options: ["18", "20", "21", "22"],
+        correct_answer: "20",
+        fun_fact: "Counting helps us organize and understand numbers!",
+        difficulty: 1,
+      }
+    ];
+  }
+  
+  if (topicName.includes('science')) {
+    return [
+      {
+        topic_id: topicId,
+        text: "What do plants need to grow?",
+        question_type: "multiple_choice",
+        options: ["Water and sunlight", "Only water", "Only soil", "Only air"],
+        correct_answer: "Water and sunlight",
+        fun_fact: "Plants use sunlight to make their own food through photosynthesis!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "What is the largest planet in our solar system?",
+        question_type: "multiple_choice",
+        options: ["Earth", "Mars", "Jupiter", "Saturn"],
+        correct_answer: "Jupiter",
+        fun_fact: "Jupiter is so big that all other planets could fit inside it!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "What do we breathe in to stay alive?",
+        question_type: "multiple_choice",
+        options: ["Carbon dioxide", "Oxygen", "Water", "Nitrogen"],
+        correct_answer: "Oxygen",
+        fun_fact: "Trees and plants make the oxygen we breathe!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "What causes rain?",
+        question_type: "multiple_choice",
+        options: ["Clouds cooling down", "Wind blowing", "The sun shining", "Mountains moving"],
+        correct_answer: "Clouds cooling down",
+        fun_fact: "Water evaporates, forms clouds, then falls back down as rain!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "What is the center of an atom called?",
+        question_type: "multiple_choice",
+        options: ["Electron", "Proton", "Nucleus", "Neutron"],
+        correct_answer: "Nucleus",
+        fun_fact: "Everything around us is made of tiny atoms!",
+        difficulty: 1,
+      }
+    ];
+  }
+
+  // Default generic questions for any other topic
+  return [
+    {
+      topic_id: topicId,
+      text: `What is something interesting about ${topic.name}?`,
+      question_type: "multiple_choice",
+      options: ["It's educational", "It's fun to learn", "It's important", "All of the above"],
+      correct_answer: "All of the above",
+      fun_fact: `Learning about ${topic.name} helps us understand the world better!`,
+      difficulty: 1,
+    },
+    {
+      topic_id: topicId,
+      text: `Why is ${topic.name} important to study?`,
+      question_type: "multiple_choice",
+      options: ["It teaches us new things", "It's not important", "Only adults need it", "It's too hard"],
+      correct_answer: "It teaches us new things",
+      fun_fact: `${topic.name} opens up new ways of thinking and understanding!`,
+      difficulty: 1,
+    },
+    {
+      topic_id: topicId,
+      text: `What can we learn from ${topic.name}?`,
+      question_type: "multiple_choice",
+      options: ["New facts", "How things work", "Different perspectives", "All of these"],
+      correct_answer: "All of these",
+      fun_fact: `Every subject teaches us something valuable about our world!`,
+      difficulty: 1,
+    }
+  ];
+}
