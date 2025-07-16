@@ -53,17 +53,34 @@ serve(async (req) => {
 
     console.log(`Generating questions for topic: ${topic.name}`);
 
-    // Create prompt for OpenAI
+    // Create comprehensive child-safety prompt for OpenAI
     const prompt = `Create exactly 10 educational quiz questions for children aged 6-10 years old about "${topic.name}".
 
-Requirements:
+CRITICAL CHILD SAFETY REQUIREMENTS:
+- Content MUST be 100% appropriate for young children (ages 6-10)
+- NO scary, violent, inappropriate, or mature content whatsoever
+- Use only positive, educational, and age-appropriate language
+- Focus on basic, foundational knowledge suitable for elementary school
+- Questions should be encouraging and fun, never frightening or disturbing
+- All content must be factual, educational, and sourced from reliable children's educational materials
+
+CONTENT GUIDELINES:
+- Use simple vocabulary (no words above 4th grade reading level)
+- Ask about basic facts, colors, numbers, simple science concepts
+- Include only wholesome, educational topics
+- Make learning fun and engaging
+- Ensure all facts are accurate and verifiable
+- No complex or abstract concepts beyond elementary level
+
+SPECIFIC REQUIREMENTS:
 - Each question should be age-appropriate with simple, clear language
 - Include exactly 4 multiple choice options (A, B, C, D) for each question
 - One option should be clearly correct
-- Include a fun, educational fact for each question
-- Make questions engaging and educational
-- Use vocabulary suitable for elementary school children
+- Include a fun, educational fact for each question that children would find interesting
+- Make questions engaging and educational but never scary or inappropriate
+- Use vocabulary and concepts suitable for elementary school children
 
+FORMAT REQUIREMENT:
 Format your response as a JSON array with exactly this structure:
 [
   {
@@ -75,7 +92,7 @@ Format your response as a JSON array with exactly this structure:
 ]
 
 Topic: ${topic.name}
-Generate exactly 10 questions now:`;
+Remember: All content must be completely safe and appropriate for young children. Generate exactly 10 questions now:`;
 
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -128,6 +145,35 @@ Generate exactly 10 questions now:`;
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    // CHILD SAFETY VALIDATION: Additional content screening
+    const validateChildSafety = (text: string): boolean => {
+      const inappropriateWords = [
+        'scary', 'frightening', 'death', 'kill', 'violence', 'weapon', 'blood', 'hurt', 'pain',
+        'fight', 'war', 'bomb', 'gun', 'knife', 'dangerous', 'poison', 'toxic', 'hate',
+        'stupid', 'dumb', 'bad', 'evil', 'monster', 'ghost', 'devil', 'hell', 'damn'
+      ];
+      
+      const lowerText = text.toLowerCase();
+      return !inappropriateWords.some(word => lowerText.includes(word));
+    };
+
+    // Validate all generated content for child safety
+    for (const question of questions) {
+      if (!validateChildSafety(question.text) || 
+          !validateChildSafety(question.fun_fact) ||
+          !question.options.every((option: string) => validateChildSafety(option))) {
+        console.error('Generated content failed child safety validation');
+        return new Response(JSON.stringify({ 
+          error: 'Generated content was not appropriate for children. Please try again.' 
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    console.log('All generated content passed child safety validation ✅');
 
     // First, delete existing questions for this topic
     const { error: deleteError } = await supabase
