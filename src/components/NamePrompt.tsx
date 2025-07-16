@@ -21,8 +21,8 @@ export const NamePrompt = ({ onComplete }: NamePromptProps) => {
     
     if (!name.trim()) {
       toast({
-        title: "Please enter a name",
-        description: "We need your name to personalize your Quiz Buddy experience!",
+        title: "Please enter your child's name",
+        description: "We need their name to personalize their Quiz Buddy experience!",
         variant: "destructive",
       });
       return;
@@ -66,10 +66,10 @@ export const NamePrompt = ({ onComplete }: NamePromptProps) => {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-foreground">
-            Welcome to Quiz Buddy! 🎓
+            Set Up Your Child's Profile! 👶
           </CardTitle>
           <CardDescription className="text-lg text-muted-foreground">
-            What's your name? We'd love to personalize your learning adventure!
+            What's your child's name? We'll personalize their Quiz Buddy experience!
           </CardDescription>
         </CardHeader>
         
@@ -78,7 +78,7 @@ export const NamePrompt = ({ onComplete }: NamePromptProps) => {
             <div className="space-y-2">
               <Input
                 type="text"
-                placeholder="Enter your name here..."
+                placeholder="Enter your child's name here..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="text-lg py-3 text-center font-medium border-2 focus:border-primary"
@@ -96,11 +96,11 @@ export const NamePrompt = ({ onComplete }: NamePromptProps) => {
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Setting up your profile...
+                  Setting up profile...
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  Let's Start Learning!
+                  Start Their Learning Journey!
                   <ArrowRight className="w-4 h-4" />
                 </div>
               )}
@@ -109,7 +109,7 @@ export const NamePrompt = ({ onComplete }: NamePromptProps) => {
           
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Don't worry, you can always change this later! 😊
+              You can always update their name later in the profile settings! 😊
             </p>
           </div>
         </CardContent>
