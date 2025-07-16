@@ -117,7 +117,7 @@ erDiagram
 
 ## Project Info
 
-**URL**: https://lovable.dev/projects/04e9efb8-923f-467f-aaef-b1e2457318f8
+**URL**: https://quiz-buddy-github-link.lovable.app/
 
 ## How can I edit this code?
 
