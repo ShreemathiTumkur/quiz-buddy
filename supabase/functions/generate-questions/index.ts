@@ -190,9 +190,21 @@ Remember: All content must be completely safe and appropriate for young children
 
     // Validate all generated content for child safety
     for (const question of questions) {
-      if (!validateChildSafety(question.text) || 
-          !validateChildSafety(question.fun_fact) ||
-          (question.options && !question.options.every((option: string) => validateChildSafety(option)))) {
+      const questionSafe = validateChildSafety(question.text);
+      const funFactSafe = validateChildSafety(question.fun_fact);
+      const optionsSafe = question.options ? question.options.every((option: string) => validateChildSafety(option)) : true;
+      
+      if (!questionSafe) {
+        console.error('Question failed validation:', question.text);
+      }
+      if (!funFactSafe) {
+        console.error('Fun fact failed validation:', question.fun_fact);
+      }
+      if (!optionsSafe) {
+        console.error('Options failed validation:', question.options);
+      }
+      
+      if (!questionSafe || !funFactSafe || !optionsSafe) {
         console.error('Generated content failed child safety validation');
         return new Response(JSON.stringify({ 
           error: 'Generated content was not appropriate for children. Please try again.' 
