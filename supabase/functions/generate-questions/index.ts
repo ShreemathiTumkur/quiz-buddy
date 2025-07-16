@@ -272,6 +272,57 @@ function getFallbackQuestions(topic: any, topicId: string) {
     ];
   }
 
+  // Factual questions for Volcanoes
+  if (topicName.includes('volcano')) {
+    return [
+      {
+        topic_id: topicId,
+        text: "What comes out of a volcano when it erupts?",
+        question_type: "multiple_choice",
+        options: ["Water", "Lava", "Ice", "Sand"],
+        correct_answer: "Lava",
+        fun_fact: "Lava is melted rock that can reach temperatures of over 2,000°F!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "What is the ring of volcanoes around the Pacific Ocean called?",
+        question_type: "multiple_choice",
+        options: ["Ring of Fire", "Circle of Mountains", "Ocean Ring", "Pacific Circle"],
+        correct_answer: "Ring of Fire",
+        fun_fact: "The Ring of Fire has about 75% of the world's active volcanoes!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "What type of rock is formed when lava cools down?",
+        question_type: "multiple_choice",
+        options: ["Sedimentary", "Metamorphic", "Igneous", "Limestone"],
+        correct_answer: "Igneous",
+        fun_fact: "Igneous rocks like obsidian and pumice are created by volcanic activity!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "What is the opening at the top of a volcano called?",
+        question_type: "multiple_choice",
+        options: ["Crater", "Summit", "Peak", "Hole"],
+        correct_answer: "Crater",
+        fun_fact: "Some volcano craters are so big they can hold entire lakes!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "Which country has the most active volcanoes?",
+        question_type: "multiple_choice",
+        options: ["Italy", "Indonesia", "Japan", "Iceland"],
+        correct_answer: "Indonesia",
+        fun_fact: "Indonesia has over 130 active volcanoes!",
+        difficulty: 1,
+      }
+    ];
+  }
+
   // Factual questions for Geography
   if (topicName.includes('geography')) {
     return [
@@ -338,33 +389,33 @@ function getFallbackQuestions(topic: any, topicId: string) {
     ];
   }
 
-  // Default factual questions for any other topic
+  // For topics we don't have specific questions for, generate topic-relevant questions
   return [
     {
       topic_id: topicId,
-      text: "How many days are in a year?",
+      text: `What is ${topic.name} related to?`,
       question_type: "multiple_choice",
-      options: ["360", "365", "370", "400"],
-      correct_answer: "365",
-      fun_fact: "Earth takes exactly 365.25 days to orbit around the Sun!",
+      options: ["Learning and education", "Nothing important", "Only adults", "Boring stuff"],
+      correct_answer: "Learning and education",
+      fun_fact: `${topic.name} is a fascinating subject with many interesting facts to discover!`,
       difficulty: 1,
     },
     {
       topic_id: topicId,
-      text: "What color do you get when you mix red and yellow?",
+      text: `How can we learn more about ${topic.name}?`,
       question_type: "multiple_choice",
-      options: ["Purple", "Green", "Orange", "Pink"],
-      correct_answer: "Orange",
-      fun_fact: "Orange is a secondary color made by mixing two primary colors!",
+      options: ["Reading books", "Asking questions", "Observing carefully", "All of these"],
+      correct_answer: "All of these",
+      fun_fact: `There are many ways to explore and understand ${topic.name}!`,
       difficulty: 1,
     },
     {
       topic_id: topicId,
-      text: "How many minutes are in one hour?",
+      text: `What makes ${topic.name} interesting to study?`,
       question_type: "multiple_choice",
-      options: ["50", "60", "70", "100"],
-      correct_answer: "60",
-      fun_fact: "There are 60 minutes in an hour and 24 hours in a day!",
+      options: ["It teaches us facts", "It helps us understand", "It's educational", "All of these"],
+      correct_answer: "All of these",
+      fun_fact: `Every subject like ${topic.name} has amazing facts waiting to be discovered!`,
       difficulty: 1,
     }
   ];
