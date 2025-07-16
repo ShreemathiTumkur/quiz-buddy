@@ -16,9 +16,10 @@ interface QuestionGeneratorProps {
   topics: Topic[];
   onQuestionsGenerated: () => void;
   onTopicsUpdated: () => void;
+  onSwitchToPlay?: () => void;
 }
 
-export const QuestionGenerator = ({ topics, onQuestionsGenerated, onTopicsUpdated }: QuestionGeneratorProps) => {
+export const QuestionGenerator = ({ topics, onQuestionsGenerated, onTopicsUpdated, onSwitchToPlay }: QuestionGeneratorProps) => {
   const [generatingTopics, setGeneratingTopics] = useState<Set<string>>(new Set());
   const [isAddingTopic, setIsAddingTopic] = useState(false);
   const [newTopicName, setNewTopicName] = useState('');
@@ -98,6 +99,13 @@ export const QuestionGenerator = ({ topics, onQuestionsGenerated, onTopicsUpdate
       setNewTopicName('');
       setNewTopicEmoji('');
       onTopicsUpdated();
+
+      // Switch to Play tab to show the new topic
+      setTimeout(() => {
+        if (onSwitchToPlay) {
+          onSwitchToPlay();
+        }
+      }, 1000);
 
     } catch (error) {
       console.error('Error adding topic:', error);

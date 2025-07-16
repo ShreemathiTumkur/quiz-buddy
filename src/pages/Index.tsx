@@ -226,6 +226,7 @@ const Index = () => {
                 topics={topics} 
                 onQuestionsGenerated={handleQuestionsGenerated}
                 onTopicsUpdated={handleTopicsUpdated}
+                onSwitchToPlay={() => setActiveTab('play')}
               />
             </TabsContent>
           </Tabs>
