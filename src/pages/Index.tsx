@@ -8,10 +8,12 @@ import { QuizResults } from '@/components/QuizResults';
 import { ChatTab } from '@/components/ChatTab';
 import { NamePrompt } from '@/components/NamePrompt';
 import UserProfile from '@/components/UserProfile';
+import { QuestionGenerator } from '@/components/QuestionGenerator';
 import { quizTopics, QuizTopic } from '@/data/quizData';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Loader2, LogIn } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, LogIn, Settings, Play } from 'lucide-react';
 import quizBuddyLogo from '@/assets/quiz-buddy-logo.png';
 
 type AppState = 'home' | 'quiz' | 'results';
@@ -32,6 +34,7 @@ const Index = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [topics, setTopics] = useState<DbTopic[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('play');
 
   // Fetch topics from Supabase
   useEffect(() => {
@@ -59,6 +62,11 @@ const Index = () => {
       fetchTopics();
     }
   }, [user]);
+
+  const handleQuestionsGenerated = () => {
+    // Trigger a re-fetch of topics or show a success message
+    // The questions are already updated in the database
+  };
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -148,59 +156,91 @@ const Index = () => {
           <div className="absolute top-1/3 right-10 text-4xl" style={{animationDelay: '5s'}}>🎉</div>
         </div>
         
-        <div className="container mx-auto px-4 relative z-10 flex-1 flex flex-col justify-evenly py-8">
+        <div className="container mx-auto px-4 relative z-10 flex-1 flex flex-col py-8">
           {/* Quiz Buddy Title */}
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-4">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-4 mb-6">
               <img 
                 src={quizBuddyLogo} 
                 alt="Quiz Buddy Logo" 
-                className="w-20 h-20 object-contain"
+                className="w-16 h-16 object-contain"
               />
-              <h1 className="text-7xl font-bold text-foreground font-fredoka">
+              <h1 className="text-5xl font-bold text-foreground font-fredoka">
                 Quiz-Buddy
               </h1>
             </div>
-          </div>
-
-          {/* Welcome Banner */}
-          <div className="text-center">
-            <div className="inline-block bg-purple-600 p-4 rounded-full shadow-lg">
-              <p className="text-xl font-semibold text-white">
-                🎓 Welcome to QuizBuddy, {profile?.display_name}! Choose a topic to start your learning adventure! 🌈
+            <div className="inline-block bg-purple-600 p-3 rounded-full shadow-lg">
+              <p className="text-lg font-semibold text-white">
+                🎓 Welcome to QuizBuddy, {profile?.display_name}! 🌈
               </p>
             </div>
           </div>
 
-          {/* Topic Buttons */}
-          <div className="flex items-center justify-center">
-            {topicsLoading ? (
-              <TopicsGridSkeleton />
-            ) : topics.length > 0 ? (
-              <div className="flex flex-wrap justify-center gap-12">
-                {topics.map((topic, index) => (
-                  <div 
-                    key={topic.id} 
-                    className="animate-fade-in"
-                    style={{animationDelay: `${index * 0.2}s`}}
-                  >
-                    <TopicButton
-                      emoji={topic.emoji}
-                      title={topic.name}
-                      onClick={() => handleTopicSelect(topic.id)}
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">📚</div>
-                <h3 className="text-2xl font-bold text-foreground mb-2">No Topics Yet!</h3>
-                <p className="text-lg text-muted-foreground">
-                  Ask your grown-up to add topics! 👨‍👩‍👧‍👦
-                </p>
-              </div>
-            )}
+          {/* Tabs */}
+          <div className="flex-1">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
+                <TabsTrigger value="play" className="flex items-center gap-2">
+                  <Play className="h-4 w-4" />
+                  Play Quiz
+                </TabsTrigger>
+                <TabsTrigger value="manage" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Manage Questions
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="play" className="space-y-6">
+                <div className="text-center mb-6">
+                  <p className="text-lg text-muted-foreground">
+                    Choose a topic to start your learning adventure!
+                  </p>
+                </div>
+                
+                <div className="flex items-center justify-center">
+                  {topicsLoading ? (
+                    <TopicsGridSkeleton />
+                  ) : topics.length > 0 ? (
+                    <div className="flex flex-wrap justify-center gap-8">
+                      {topics.map((topic, index) => (
+                        <div 
+                          key={topic.id} 
+                          className="animate-fade-in"
+                          style={{animationDelay: `${index * 0.2}s`}}
+                        >
+                          <TopicButton
+                            emoji={topic.emoji}
+                            title={topic.name}
+                            onClick={() => handleTopicSelect(topic.id)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-4">📚</div>
+                      <h3 className="text-2xl font-bold text-foreground mb-2">No Topics Yet!</h3>
+                      <p className="text-lg text-muted-foreground">
+                        Ask your grown-up to add topics! 👨‍👩‍👧‍👦
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="manage" className="space-y-6">
+                <div className="text-center mb-6">
+                  <p className="text-lg text-muted-foreground">
+                    Generate fresh AI-powered questions for each topic
+                  </p>
+                </div>
+                
+                <QuestionGenerator 
+                  topics={topics} 
+                  onQuestionsGenerated={handleQuestionsGenerated}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
 
