@@ -86,20 +86,6 @@ serve(async (req) => {
 
     console.log(`✅ Topic found: ${topic.name}`);
 
-    // TEMPORARY: Return early for Telugu to test basic function execution
-    if (topic.name.toLowerCase().includes('telugu')) {
-      console.log('🧪 TESTING: Returning early for Telugu topic');
-      return new Response(JSON.stringify({ 
-        success: true, 
-        topicName: topic.name,
-        questionsGenerated: 0,
-        message: 'Telugu test - function execution successful',
-        questions: [] 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     // Create comprehensive child-safety prompt for OpenAI
     const prompt = `Create exactly 10 educational quiz questions for children aged 6-10 years old about "${topic.name}".
 
