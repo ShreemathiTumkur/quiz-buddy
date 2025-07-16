@@ -72,10 +72,15 @@ CONTENT GUIDELINES:
 - Ensure all facts are accurate and verifiable
 - No complex or abstract concepts beyond elementary level
 
+QUESTION TYPE VARIETY:
+Create a mix of different question types (distribute evenly):
+1. Multiple Choice (4 options)
+2. True/False 
+3. Fill in the blank
+4. Yes/No questions
+
 SPECIFIC REQUIREMENTS:
 - Each question should be age-appropriate with simple, clear language
-- Include exactly 4 multiple choice options (A, B, C, D) for each question
-- One option should be clearly correct
 - Include a fun, educational fact for each question that children would find interesting
 - Make questions engaging and educational but never scary or inappropriate
 - Use vocabulary and concepts suitable for elementary school children
@@ -85,14 +90,24 @@ Format your response as a JSON array with exactly this structure:
 [
   {
     "text": "Question text here?",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "correct_answer": "Option B",
+    "type": "multiple_choice|true_false|fill_blank|yes_no",
+    "options": ["Option A", "Option B", "Option C", "Option D"] OR ["True", "False"] OR ["Yes", "No"] OR null for fill_blank,
+    "correct_answer": "The correct answer",
     "fun_fact": "Fun educational fact here!"
   }
 ]
 
+EXAMPLES:
+Multiple Choice: {"text": "What color do you get when you mix red and yellow?", "type": "multiple_choice", "options": ["Purple", "Orange", "Green", "Blue"], "correct_answer": "Orange", "fun_fact": "Orange is a secondary color made by mixing two primary colors!"}
+
+True/False: {"text": "The sun is a star.", "type": "true_false", "options": ["True", "False"], "correct_answer": "True", "fun_fact": "The sun is the closest star to Earth!"}
+
+Fill in blank: {"text": "A group of lions is called a ____.", "type": "fill_blank", "options": null, "correct_answer": "pride", "fun_fact": "Lions live together in family groups called prides!"}
+
+Yes/No: {"text": "Do penguins live at the North Pole?", "type": "yes_no", "options": ["Yes", "No"], "correct_answer": "No", "fun_fact": "Penguins actually live in Antarctica at the South Pole!"}
+
 Topic: ${topic.name}
-Remember: All content must be completely safe and appropriate for young children. Generate exactly 10 questions now:`;
+Remember: All content must be completely safe and appropriate for young children. Generate exactly 10 questions with a good mix of question types now:`;
 
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
