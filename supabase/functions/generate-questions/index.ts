@@ -185,7 +185,7 @@ Remember: All content must be completely safe and appropriate for young children
     for (const question of questions) {
       if (!validateChildSafety(question.text) || 
           !validateChildSafety(question.fun_fact) ||
-          !question.options.every((option: string) => validateChildSafety(option))) {
+          (question.options && !question.options.every((option: string) => validateChildSafety(option)))) {
         console.error('Generated content failed child safety validation');
         return new Response(JSON.stringify({ 
           error: 'Generated content was not appropriate for children. Please try again.' 
