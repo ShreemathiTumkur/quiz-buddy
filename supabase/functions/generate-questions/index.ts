@@ -120,6 +120,7 @@ Topic: ${topic.name}
 Remember: All content must be completely safe and appropriate for young children. Generate exactly 10 questions${topic.name.toLowerCase().includes('telugu') ? ' focused on basic Telugu vocabulary' : ' with a good mix of question types'} now:`;
 
     // Call OpenAI API
+    console.log('Making request to OpenAI API...');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -143,9 +144,18 @@ Remember: All content must be completely safe and appropriate for young children
       }),
     });
 
+    console.log(`OpenAI API response status: ${response.status}`);
+    
     if (!response.ok) {
-      console.error(`OpenAI API error: ${response.status} - ${await response.text()}`);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`OpenAI API error: ${response.status} - ${errorText}`);
+      return new Response(JSON.stringify({ 
+        error: `OpenAI API error: ${response.status}`,
+        details: errorText 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const openAIData = await response.json();
