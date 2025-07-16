@@ -2,17 +2,25 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { TopicButton } from '@/components/TopicButton';
+import { TopicsGridSkeleton } from '@/components/TopicSkeleton';
 import { QuizQuestion } from '@/components/QuizQuestion';
 import { QuizResults } from '@/components/QuizResults';
 import { ChatTab } from '@/components/ChatTab';
 import { NamePrompt } from '@/components/NamePrompt';
 import UserProfile from '@/components/UserProfile';
 import { quizTopics, QuizTopic } from '@/data/quizData';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Loader2, LogIn } from 'lucide-react';
 import quizBuddyLogo from '@/assets/quiz-buddy-logo.png';
 
 type AppState = 'home' | 'quiz' | 'results';
+
+interface DbTopic {
+  id: string;
+  name: string;
+  emoji: string;
+}
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
@@ -22,6 +30,35 @@ const Index = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [topics, setTopics] = useState<DbTopic[]>([]);
+  const [topicsLoading, setTopicsLoading] = useState(true);
+
+  // Fetch topics from Supabase
+  useEffect(() => {
+    const fetchTopics = async () => {
+      try {
+        setTopicsLoading(true);
+        const { data, error } = await supabase
+          .from('topics')
+          .select('id, name, emoji')
+          .order('name');
+        
+        if (error) {
+          console.error('Error fetching topics:', error);
+        } else {
+          setTopics(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching topics:', error);
+      } finally {
+        setTopicsLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchTopics();
+    }
+  }, [user]);
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -30,11 +67,15 @@ const Index = () => {
     }
   }, [user, loading, navigate]);
 
-  const handleTopicSelect = (topic: QuizTopic) => {
-    setSelectedTopic(topic);
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setAppState('quiz');
+  const handleTopicSelect = (topicName: string) => {
+    // Find the corresponding hardcoded topic for quiz functionality
+    const hardcodedTopic = quizTopics.find(qt => qt.title === topicName);
+    if (hardcodedTopic) {
+      setSelectedTopic(hardcodedTopic);
+      setCurrentQuestionIndex(0);
+      setScore(0);
+      setAppState('quiz');
+    }
   };
 
   const handleAnswer = (isCorrect: boolean) => {
@@ -118,14 +159,14 @@ const Index = () => {
           {/* Header */}
           <div className="text-center mb-12">
             <div className="mb-8">
-              <div className="flex items-center justify-center gap-4 mb-4">
+              <div className="flex items-center justify-center gap-4 mb-6">
                 <img 
                   src={quizBuddyLogo} 
                   alt="Quiz Buddy Logo" 
                   className="w-20 h-20 object-contain"
                 />
-                <h1 className="text-7xl font-bold text-foreground">
-                  Quiz Buddy
+                <h1 className="text-7xl font-bold text-foreground font-fredoka">
+                  Quiz-Buddy
                 </h1>
               </div>
               <div className="inline-block bg-purple-600 p-4 rounded-full shadow-lg">
@@ -137,22 +178,34 @@ const Index = () => {
           </div>
 
           {/* Topic Buttons */}
-          <div className="flex flex-wrap justify-center gap-12 mb-12">
-            {quizTopics.map((topic, index) => (
-              <div 
-                key={topic.id} 
-                className="animate-fade-in"
-                style={{animationDelay: `${index * 0.2}s`}}
-              >
-                <TopicButton
-                  icon={topic.emoji}
-                  title={topic.title}
-                  description={topic.description}
-                  color={topic.color}
-                  onClick={() => handleTopicSelect(topic)}
-                />
+          <div className="mb-12">
+            {topicsLoading ? (
+              <TopicsGridSkeleton />
+            ) : topics.length > 0 ? (
+              <div className="flex flex-wrap justify-center gap-12">
+                {topics.map((topic, index) => (
+                  <div 
+                    key={topic.id} 
+                    className="animate-fade-in"
+                    style={{animationDelay: `${index * 0.2}s`}}
+                  >
+                    <TopicButton
+                      emoji={topic.emoji}
+                      title={topic.name}
+                      onClick={() => handleTopicSelect(topic.name)}
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📚</div>
+                <h3 className="text-2xl font-bold text-foreground mb-2">No Topics Yet!</h3>
+                <p className="text-lg text-muted-foreground">
+                  Ask your grown-up to add topics! 👨‍👩‍👧‍👦
+                </p>
+              </div>
+            )}
           </div>
 
         </div>
