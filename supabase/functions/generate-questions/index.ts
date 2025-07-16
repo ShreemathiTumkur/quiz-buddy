@@ -48,14 +48,16 @@ serve(async (req) => {
       console.log('Using OpenAI for question generation');
       
       try {
-        const prompt = `Generate exactly 10 educational quiz questions for children aged 6-10 about "${topic.name}".
+        const prompt = `Generate exactly 10 factual quiz questions for children aged 6-10 about "${topic.name}".
 
         Requirements:
-        - Age-appropriate content for 6-10 year olds
+        - Age-appropriate FACTUAL content for 6-10 year olds
+        - Only ask questions with definitive, factual answers (no opinions or preferences)
         - Include multiple choice questions with 4 options each
-        - Include one fun educational fact for each question
+        - Focus on facts, numbers, names, dates, science facts, etc.
+        - Include one educational fact for each question
         - Return valid JSON format
-        - Make questions engaging and educational
+        - Make questions factual and educational
 
         Response format:
         [
@@ -270,33 +272,99 @@ function getFallbackQuestions(topic: any, topicId: string) {
     ];
   }
 
-  // Default generic questions for any other topic
+  // Factual questions for Geography
+  if (topicName.includes('geography')) {
+    return [
+      {
+        topic_id: topicId,
+        text: "What is the largest continent?",
+        question_type: "multiple_choice",
+        options: ["Africa", "Asia", "North America", "Europe"],
+        correct_answer: "Asia",
+        fun_fact: "Asia covers about 30% of Earth's total land area!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "How many continents are there?",
+        question_type: "multiple_choice",
+        options: ["5", "6", "7", "8"],
+        correct_answer: "7",
+        fun_fact: "The seven continents are Asia, Africa, North America, South America, Antarctica, Europe, and Australia!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "What is the longest river in the world?",
+        question_type: "multiple_choice",
+        options: ["Amazon River", "Nile River", "Mississippi River", "Yangtze River"],
+        correct_answer: "Nile River",
+        fun_fact: "The Nile River is about 4,135 miles long!",
+        difficulty: 1,
+      }
+    ];
+  }
+
+  // Factual questions for Animals
+  if (topicName.includes('animals')) {
+    return [
+      {
+        topic_id: topicId,
+        text: "What is the largest animal on Earth?",
+        question_type: "multiple_choice",
+        options: ["African Elephant", "Blue Whale", "Giraffe", "Polar Bear"],
+        correct_answer: "Blue Whale",
+        fun_fact: "A blue whale's heart alone can weigh as much as a car!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "How many legs does a spider have?",
+        question_type: "multiple_choice",
+        options: ["6", "8", "10", "12"],
+        correct_answer: "8",
+        fun_fact: "All spiders have 8 legs, which helps scientists identify them!",
+        difficulty: 1,
+      },
+      {
+        topic_id: topicId,
+        text: "What do pandas mainly eat?",
+        question_type: "multiple_choice",
+        options: ["Fish", "Meat", "Bamboo", "Fruits"],
+        correct_answer: "Bamboo",
+        fun_fact: "Pandas eat about 26-84 pounds of bamboo every day!",
+        difficulty: 1,
+      }
+    ];
+  }
+
+  // Default factual questions for any other topic
   return [
     {
       topic_id: topicId,
-      text: `What is something interesting about ${topic.name}?`,
+      text: "How many days are in a year?",
       question_type: "multiple_choice",
-      options: ["It's educational", "It's fun to learn", "It's important", "All of the above"],
-      correct_answer: "All of the above",
-      fun_fact: `Learning about ${topic.name} helps us understand the world better!`,
+      options: ["360", "365", "370", "400"],
+      correct_answer: "365",
+      fun_fact: "Earth takes exactly 365.25 days to orbit around the Sun!",
       difficulty: 1,
     },
     {
       topic_id: topicId,
-      text: `Why is ${topic.name} important to study?`,
+      text: "What color do you get when you mix red and yellow?",
       question_type: "multiple_choice",
-      options: ["It teaches us new things", "It's not important", "Only adults need it", "It's too hard"],
-      correct_answer: "It teaches us new things",
-      fun_fact: `${topic.name} opens up new ways of thinking and understanding!`,
+      options: ["Purple", "Green", "Orange", "Pink"],
+      correct_answer: "Orange",
+      fun_fact: "Orange is a secondary color made by mixing two primary colors!",
       difficulty: 1,
     },
     {
       topic_id: topicId,
-      text: `What can we learn from ${topic.name}?`,
+      text: "How many minutes are in one hour?",
       question_type: "multiple_choice",
-      options: ["New facts", "How things work", "Different perspectives", "All of these"],
-      correct_answer: "All of these",
-      fun_fact: `Every subject teaches us something valuable about our world!`,
+      options: ["50", "60", "70", "100"],
+      correct_answer: "60",
+      fun_fact: "There are 60 minutes in an hour and 24 hours in a day!",
       difficulty: 1,
     }
   ];
