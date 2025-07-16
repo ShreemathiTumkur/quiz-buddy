@@ -181,7 +181,11 @@ Remember: All content must be completely safe and appropriate for young children
       ];
       
       const lowerText = text.toLowerCase();
-      return !inappropriateWords.some(word => lowerText.includes(word));
+      // Use word boundaries to avoid false positives like "bad" in "protector"
+      return !inappropriateWords.some(word => {
+        const wordRegex = new RegExp(`\\b${word}\\b`, 'i');
+        return wordRegex.test(lowerText);
+      });
     };
 
     // Validate all generated content for child safety
