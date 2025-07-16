@@ -18,7 +18,9 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting generate-questions function');
     const { topicId } = await req.json();
+    console.log('Received topicId:', topicId);
 
     if (!topicId) {
       return new Response(JSON.stringify({ error: 'Topic ID is required' }), {
