@@ -132,7 +132,7 @@ const Index = () => {
 
   if (appState === 'home') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 relative overflow-hidden flex flex-col">
         {/* User Profile in top right */}
         <div className="absolute top-4 right-4 z-20">
           <UserProfile />
@@ -148,9 +148,9 @@ const Index = () => {
           <div className="absolute top-1/3 right-10 text-4xl" style={{animationDelay: '5s'}}>🎉</div>
         </div>
         
-        <div className="container mx-auto px-4 py-12 relative z-10">
+        <div className="container mx-auto px-4 relative z-10 flex-1 flex flex-col justify-center">
           {/* Header */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <div className="mb-8">
               <div className="flex items-center justify-center gap-4 mb-6">
                 <img 
@@ -171,7 +171,7 @@ const Index = () => {
           </div>
 
           {/* Topic Buttons */}
-          <div className="mb-12">
+          <div className="flex-1 flex items-center justify-center">
             {topicsLoading ? (
               <TopicsGridSkeleton />
             ) : topics.length > 0 ? (
@@ -201,6 +201,8 @@ const Index = () => {
             )}
           </div>
 
+          {/* Bottom spacer */}
+          <div className="h-16"></div>
         </div>
 
         <ChatTab
