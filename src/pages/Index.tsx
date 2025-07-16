@@ -151,8 +151,8 @@ const Index = () => {
         <div className="container mx-auto px-4 relative z-10 flex-1 flex flex-col justify-center">
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="mb-8">
-              <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="mb-16">
+              <div className="flex items-center justify-center gap-4 mb-12">
                 <img 
                   src={quizBuddyLogo} 
                   alt="Quiz Buddy Logo" 
