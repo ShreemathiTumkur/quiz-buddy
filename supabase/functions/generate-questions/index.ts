@@ -73,11 +73,17 @@ CONTENT GUIDELINES:
 - No complex or abstract concepts beyond elementary level
 
 QUESTION TYPE VARIETY:
-Create a mix of different question types (distribute evenly):
+${topic.name.toLowerCase().includes('telugu') ? 
+  `For Telugu topics, create ONLY vocabulary questions:
+- Ask for Telugu words for simple English words
+- Use "voice_input" type for all Telugu questions (children will speak the answer)
+- Focus on basic vocabulary: family members, colors, numbers, animals, body parts, food items
+- Example: "What is the Telugu word for 'Mother'?" (Answer: "అమ్మ")` :
+  `Create a mix of different question types (distribute evenly):
 1. Multiple Choice (4 options)
 2. True/False 
 3. Fill in the blank
-4. Yes/No questions
+4. Yes/No questions`}
 
 SPECIFIC REQUIREMENTS:
 - Each question should be age-appropriate with simple, clear language
@@ -90,24 +96,26 @@ Format your response as a JSON array with exactly this structure:
 [
   {
     "text": "Question text here?",
-    "type": "multiple_choice|true_false|fill_blank|yes_no",
-    "options": ["Option A", "Option B", "Option C", "Option D"] OR ["True", "False"] OR ["Yes", "No"] OR null for fill_blank,
+    "type": "${topic.name.toLowerCase().includes('telugu') ? 'voice_input' : 'multiple_choice|true_false|fill_blank|yes_no|voice_input'}",
+    "options": ${topic.name.toLowerCase().includes('telugu') ? 'null' : '["Option A", "Option B", "Option C", "Option D"] OR ["True", "False"] OR ["Yes", "No"] OR null for fill_blank/voice_input'},
     "correct_answer": "The correct answer",
     "fun_fact": "Fun educational fact here!"
   }
 ]
 
 EXAMPLES:
+${topic.name.toLowerCase().includes('telugu') ? `
+Telugu Voice Input: {"text": "What is the Telugu word for 'Water'?", "type": "voice_input", "options": null, "correct_answer": "నీరు", "fun_fact": "Water is called 'నీరు' (Neeru) in Telugu, and it's essential for all living things!"}` : `
 Multiple Choice: {"text": "What color do you get when you mix red and yellow?", "type": "multiple_choice", "options": ["Purple", "Orange", "Green", "Blue"], "correct_answer": "Orange", "fun_fact": "Orange is a secondary color made by mixing two primary colors!"}
 
 True/False: {"text": "The sun is a star.", "type": "true_false", "options": ["True", "False"], "correct_answer": "True", "fun_fact": "The sun is the closest star to Earth!"}
 
 Fill in blank: {"text": "A group of lions is called a ____.", "type": "fill_blank", "options": null, "correct_answer": "pride", "fun_fact": "Lions live together in family groups called prides!"}
 
-Yes/No: {"text": "Do penguins live at the North Pole?", "type": "yes_no", "options": ["Yes", "No"], "correct_answer": "No", "fun_fact": "Penguins actually live in Antarctica at the South Pole!"}
+Yes/No: {"text": "Do penguins live at the North Pole?", "type": "yes_no", "options": ["Yes", "No"], "correct_answer": "No", "fun_fact": "Penguins actually live in Antarctica at the South Pole!"}`}
 
 Topic: ${topic.name}
-Remember: All content must be completely safe and appropriate for young children. Generate exactly 10 questions with a good mix of question types now:`;
+Remember: All content must be completely safe and appropriate for young children. Generate exactly 10 questions${topic.name.toLowerCase().includes('telugu') ? ' focused on basic Telugu vocabulary' : ' with a good mix of question types'} now:`;
 
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
